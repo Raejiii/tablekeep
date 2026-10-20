@@ -1,26 +1,163 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+    --color-night: #0d0f12;
+    --color-ink: #12151a;
+    --color-slate: #1b1f25;
+    --color-slate-2: #252a31;
+    --color-line: #363c45;
+    --color-bone: #e6e0d4;
+    --color-dust: #a59e91;
+    --color-blood: #e40712;
+    --color-wine: #9b1d14;
+    --color-gold: #d1a954;
+    --color-gold-light: #f0d48c;
+    --color-heal: #4caf7a;
+
+    --font-heading: var(--font-cormorant), "Times New Roman", serif;
+    --font-body: var(--font-crimson), Georgia, serif;
+    --font-ui: var(--font-roboto-condensed), "Arial Narrow", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+    html {
+        color-scheme: dark;
+    }
+
+    body {
+        background:
+            radial-gradient(ellipse at 50% -20%, rgba(155, 29, 20, 0.25), transparent 60%),
+            var(--color-night);
+        color: var(--color-bone);
+        font-family: var(--font-body);
+        font-size: 1.08rem;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+    }
+
+    ::selection {
+        background: var(--color-wine);
+        color: #fff;
+    }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@layer components {
+    /* panel with gold top and bottom borders, like a 5e stat block */
+    .panel {
+        background: var(--color-slate);
+        border: 1px solid var(--color-line);
+        border-top: 3px solid var(--color-gold);
+        border-bottom: 3px solid var(--color-gold);
+    }
+
+    .panel-title {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: 1.6rem;
+        line-height: 1.1;
+        color: var(--color-gold-light);
+    }
+
+    .eyebrow {
+        font-family: var(--font-ui);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #ff4d4d;
+    }
+
+    .taper {
+        height: 3px;
+        background: var(--color-wine);
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.1rem;
+        border-radius: 3px;
+        border: 1px solid transparent;
+        font-family: var(--font-ui);
+        font-weight: 700;
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-primary {
+        background: var(--color-blood);
+        color: #fff;
+    }
+
+    .btn-primary:not(:disabled):hover {
+        background: #ff1f2a;
+    }
+
+    .btn-outline {
+        border-color: #5b616a;
+        color: var(--color-bone);
+    }
+
+    .btn-outline:not(:disabled):hover {
+        border-color: var(--color-gold-light);
+    }
+
+    .input {
+        width: 100%;
+        min-width: 0;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--color-line);
+        border-radius: 3px;
+        background: var(--color-ink);
+        font-family: var(--font-ui);
+        font-size: 0.95rem;
+        color: var(--color-bone);
+    }
+
+    .input:focus {
+        outline: 2px solid var(--color-gold);
+        outline-offset: 1px;
+    }
+
+    .label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-family: var(--font-ui);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-dust);
+    }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes roll-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+}
+
+.animate-roll-in {
+    animation: roll-in 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
 }

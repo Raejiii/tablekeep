@@ -1,103 +1,56 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+const FEATURES = [
+    {
+        title: 'Live dice',
+        body: 'Roll anything from d20 to 4d6kh3. Every roll appears instantly for the whole party, so nobody fudges a saving throw.',
+    },
+    {
+        title: 'Initiative tracker',
+        body: 'Add the party and the monsters, track HP, and step through turns. Everyone at the table sees the same order in real time.',
+    },
+    {
+        title: 'AI session recaps',
+        body: 'Jot notes during the session and get a "previously on…" recap written for you, ready to read out next week.',
+    },
+]
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default async function Home() {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getClaims()
+    if (data?.claims?.sub) redirect('/campaigns')
+
+    return (
+        <main className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
+            <p className="eyebrow">D&amp;D campaign companion</p>
+            <h1 className="mt-3 max-w-3xl font-heading text-5xl font-bold leading-none text-white sm:text-7xl">
+                Keep your whole table in sync.
+            </h1>
+            <div className="taper my-6 w-72" />
+            <p className="max-w-2xl text-xl italic text-dust">
+                Tablekeep gives your group shared dice, a live initiative tracker and session notes that turn
+                themselves into recaps. Open it on a laptop at the table or on your phone over Discord.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/login?mode=signup" className="btn btn-primary">
+                    Start a campaign
+                </Link>
+                <Link href="/login" className="btn btn-outline">
+                    Sign in
+                </Link>
+            </div>
+
+            <div className="mt-16 grid gap-6 sm:grid-cols-3">
+                {FEATURES.map((feature) => (
+                    <article key={feature.title} className="panel p-5">
+                        <h2 className="panel-title">{feature.title}</h2>
+                        <div className="taper my-3" />
+                        <p className="text-dust">{feature.body}</p>
+                    </article>
+                ))}
+            </div>
+        </main>
+    )
 }
