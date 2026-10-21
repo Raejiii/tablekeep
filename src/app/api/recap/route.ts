@@ -11,7 +11,6 @@ function textError(message: string, status: number) {
 
 // Streams an AI recap of a session's notes as plain text, then saves it to the session.
 export async function POST(request: Request) {
-    const t0 = Date.now()
     const supabase = await createClient()
     const { data: claims } = await supabase.auth.getClaims()
     if (!claims?.claims?.sub) return textError('Sign in to generate recaps.', 401)
@@ -59,7 +58,6 @@ export async function POST(request: Request) {
             let recap = ''
             let blocked = false
             try {
-                console.log('recap timing: before gemini', Date.now() - t0)
                 const stream = await ai.models.generateContentStream({
                     model: RECAP_MODEL,
                     contents: userMessage,
@@ -69,9 +67,7 @@ export async function POST(request: Request) {
                         abortSignal: abort.signal,
                     },
                 })
-                console.log('recap timing: stream opened', Date.now() - t0)
                 for await (const chunk of stream) {
-                    if (!recap) console.log('recap timing: first chunk', Date.now() - t0)
                     const finish = chunk.candidates?.[0]?.finishReason
                     if (chunk.promptFeedback?.blockReason || finish === FinishReason.SAFETY || finish === FinishReason.PROHIBITED_CONTENT) {
                         blocked = true

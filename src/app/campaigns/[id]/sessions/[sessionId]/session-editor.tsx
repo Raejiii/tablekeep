@@ -143,7 +143,7 @@ export function SessionEditor({ session, recapEnabled }: { session: SessionRow; 
                         </>
                     ) : (
                         <p className="font-ui text-sm italic text-dust">
-                            {generating ? 'Gathering the threads…' : 'Write your notes, then generate a recap to read out next session.'}
+                            {generating ? 'Gathering the threads… this can take up to 30 seconds.' : 'Write your notes, then generate a recap to read out next session.'}
                         </p>
                     )}
                 </div>
