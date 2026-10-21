@@ -39,9 +39,17 @@ function RollTerms({ terms }: { terms: RolledTerm[] }) {
     )
 }
 
+// the server doesn't know the viewer's time zone, so times are only formatted in the browser
+function LocalTime({ iso }: { iso: string }) {
+    const [time, setTime] = useState('')
+    useEffect(() => {
+        setTime(new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    }, [iso])
+    return <time dateTime={iso}>{time}</time>
+}
+
 function RollEntry({ roll }: { roll: DiceRollRow }) {
     const critical = criticalOf({ expression: roll.expression, terms: roll.detail, total: roll.total })
-    const time = new Date(roll.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     return (
         <li
             className={`animate-roll-in grid grid-cols-[1fr_auto] items-center gap-x-3 border-l-4 px-3 py-2 ${
@@ -63,7 +71,9 @@ function RollEntry({ roll }: { roll: DiceRollRow }) {
             </div>
             <div className="text-right">
                 <p className="font-heading text-3xl font-bold leading-none text-white">{roll.total}</p>
-                <p className="font-ui text-[0.7rem] text-dust">{time}</p>
+                <p className="h-4 font-ui text-[0.7rem] text-dust">
+                    <LocalTime iso={roll.created_at} />
+                </p>
             </div>
         </li>
     )
