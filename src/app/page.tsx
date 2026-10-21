@@ -12,8 +12,8 @@ const FEATURES = [
         body: 'Add the party and the monsters, track HP, and step through turns. Everyone at the table sees the same order in real time.',
     },
     {
-        title: 'AI session recaps',
-        body: 'Jot notes during the session and get a "previously on…" recap written for you, ready to read out next week.',
+        title: 'Session recaps',
+        body: 'Jot notes during the session and turn them into a "previously on…" recap, ready to read out next week.',
     },
 ]
 

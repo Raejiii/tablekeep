@@ -127,7 +127,7 @@ export function SessionEditor({ session, recapEnabled }: { session: SessionRow; 
                 <div className="taper my-3" />
                 {!recapEnabled && (
                     <p className="border-l-4 border-gold bg-gold/10 px-3 py-2 font-ui text-sm">
-                        AI recaps are switched off. Add an <code>GEMINI_API_KEY</code> to enable them.
+                        Recaps are switched off right now.
                     </p>
                 )}
                 {recapError && (

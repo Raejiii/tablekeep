@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-        return textError('AI recaps are not set up yet. Add a GEMINI_API_KEY to the environment.', 503)
+        return textError('Recaps are not available right now.', 503)
     }
 
     const { data: members } = await supabase
@@ -90,9 +90,9 @@ export async function POST(request: Request) {
                     error instanceof ApiError && error.status === 429
                         ? 'Too many recap requests right now. Try again in a minute.'
                         : error instanceof ApiError && (error.status === 400 || error.status === 403) && /api key/i.test(error.message)
-                          ? 'The Gemini API key is invalid.'
+                          ? 'Recaps are not available right now.'
                           : error instanceof ApiError
-                            ? `The AI service returned an error (${error.status}).`
+                            ? 'Something went wrong while writing the recap. Try again in a minute.'
                             : 'Something went wrong while writing the recap.'
                 controller.enqueue(encoder.encode(`\n\n[${message}]`))
                 controller.close()

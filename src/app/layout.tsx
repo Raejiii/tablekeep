@@ -20,7 +20,7 @@ const robotoCondensed = Roboto_Condensed({
 
 export const metadata: Metadata = {
     title: { default: 'Tablekeep | D&D campaign companion', template: '%s | Tablekeep' },
-    description: 'Live dice, initiative tracking and AI session recaps for your D&D table.',
+    description: 'Live dice, initiative tracking and session recaps for your D&D table.',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
