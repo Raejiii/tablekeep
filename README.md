@@ -53,4 +53,6 @@ npm run dev
 2. Import the repo on Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `GEMINI_API_KEY`.
 3. In Supabase Auth settings, add your Vercel URL as the site URL.
 
+Live at https://tablekeep-app.vercel.app
+
 Built by [Rahul JS (Rae)](https://rahuljs.vercel.app).
