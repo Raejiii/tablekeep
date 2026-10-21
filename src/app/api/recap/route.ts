@@ -1,4 +1,4 @@
-import { ApiError, FinishReason, GoogleGenAI, ThinkingLevel } from '@google/genai'
+import { ApiError, FinishReason, GoogleGenAI } from '@google/genai'
 import { buildRecapMessage, RECAP_MODEL, RECAP_SYSTEM_PROMPT, RecapInputError } from '@/lib/recap'
 import { createClient } from '@/lib/supabase/server'
 
@@ -64,8 +64,6 @@ export async function POST(request: Request) {
                     config: {
                         systemInstruction: RECAP_SYSTEM_PROMPT,
                         maxOutputTokens: 4000,
-                        // a short creative summary doesn't need deep reasoning, and thinking delays the first words
-                        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
                         abortSignal: abort.signal,
                     },
                 })
@@ -87,6 +85,7 @@ export async function POST(request: Request) {
                 controller.close()
             } catch (error) {
                 if (abort.signal.aborted) return
+                console.error('Recap generation failed', error)
                 const message =
                     error instanceof ApiError && error.status === 429
                         ? 'Too many recap requests right now. Try again in a minute.'
