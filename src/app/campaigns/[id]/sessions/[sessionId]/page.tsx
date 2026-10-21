@@ -30,7 +30,7 @@ export default async function SessionPage({ params }: Params) {
             <Link href={`/campaigns/${id}`} className="font-ui text-sm text-dust hover:text-white">
                 ← Back to {session.campaigns?.name ?? 'campaign'}
             </Link>
-            <SessionEditor session={session} recapEnabled={Boolean(process.env.ANTHROPIC_API_KEY)} />
+            <SessionEditor session={session} recapEnabled={Boolean(process.env.GEMINI_API_KEY)} />
         </main>
     )
 }

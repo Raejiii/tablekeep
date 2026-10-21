@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { ApiError, FinishReason, GoogleGenAI } from '@google/genai'
 import { buildRecapMessage, RECAP_MODEL, RECAP_SYSTEM_PROMPT, RecapInputError } from '@/lib/recap'
 import { createClient } from '@/lib/supabase/server'
 
@@ -26,8 +26,9 @@ export async function POST(request: Request) {
         .maybeSingle()
     if (!session) return textError('Session not found.', 404)
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-        return textError('AI recaps are not set up yet. Add an ANTHROPIC_API_KEY to the environment.', 503)
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+        return textError('AI recaps are not set up yet. Add a GEMINI_API_KEY to the environment.', 503)
     }
 
     const { data: members } = await supabase
@@ -48,44 +49,48 @@ export async function POST(request: Request) {
         throw error
     }
 
-    const anthropic = new Anthropic()
-    const stream = anthropic.beta.messages.stream({
-        model: RECAP_MODEL,
-        max_tokens: 4000,
-        // a short creative summary doesn't need deep reasoning
-        output_config: { effort: 'low' },
-        // if a safety classifier declines, retry on Anthropic's recommended fallback model
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
-        system: RECAP_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMessage }],
-    })
+    const ai = new GoogleGenAI({ apiKey })
+    const abort = new AbortController()
 
     const encoder = new TextEncoder()
     const body = new ReadableStream<Uint8Array>({
         async start(controller) {
             let recap = ''
+            let blocked = false
             try {
-                for await (const event of stream) {
-                    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                        recap += event.delta.text
-                        controller.enqueue(encoder.encode(event.delta.text))
+                const stream = await ai.models.generateContentStream({
+                    model: RECAP_MODEL,
+                    contents: userMessage,
+                    config: {
+                        systemInstruction: RECAP_SYSTEM_PROMPT,
+                        maxOutputTokens: 4000,
+                        abortSignal: abort.signal,
+                    },
+                })
+                for await (const chunk of stream) {
+                    const finish = chunk.candidates?.[0]?.finishReason
+                    if (chunk.promptFeedback?.blockReason || finish === FinishReason.SAFETY || finish === FinishReason.PROHIBITED_CONTENT) {
+                        blocked = true
+                    }
+                    if (chunk.text) {
+                        recap += chunk.text
+                        controller.enqueue(encoder.encode(chunk.text))
                     }
                 }
-                const final = await stream.finalMessage()
-                if (final.stop_reason === 'refusal') {
+                if (blocked) {
                     controller.enqueue(encoder.encode('\n\n[The recap could not be generated for these notes.]'))
                 } else if (recap.trim()) {
                     await supabase.from('sessions').update({ recap: recap.trim(), updated_at: new Date().toISOString() }).eq('id', sessionId)
                 }
                 controller.close()
             } catch (error) {
+                if (abort.signal.aborted) return
                 const message =
-                    error instanceof Anthropic.AuthenticationError
-                        ? 'The Anthropic API key is invalid.'
-                        : error instanceof Anthropic.RateLimitError
-                          ? 'Too many recap requests right now. Try again in a minute.'
-                          : error instanceof Anthropic.APIError
+                    error instanceof ApiError && error.status === 429
+                        ? 'Too many recap requests right now. Try again in a minute.'
+                        : error instanceof ApiError && (error.status === 400 || error.status === 403) && /api key/i.test(error.message)
+                          ? 'The Gemini API key is invalid.'
+                          : error instanceof ApiError
                             ? `The AI service returned an error (${error.status}).`
                             : 'Something went wrong while writing the recap.'
                 controller.enqueue(encoder.encode(`\n\n[${message}]`))
@@ -93,7 +98,7 @@ export async function POST(request: Request) {
             }
         },
         cancel() {
-            stream.abort()
+            abort.abort()
         },
     })
 

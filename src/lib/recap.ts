@@ -1,6 +1,7 @@
 // Builds the request for an AI "previously on…" recap of a session's notes.
 
-export const RECAP_MODEL = 'claude-opus-5-5'
+// on the Gemini API free tier
+export const RECAP_MODEL = 'gemini-3.8-flash'
 export const MAX_NOTES_CHARS = 20000
 
 export const RECAP_SYSTEM_PROMPT = `You write session recaps for a Dungeons & Dragons group. The dungeon master reads your recap aloud at the start of the next session.
