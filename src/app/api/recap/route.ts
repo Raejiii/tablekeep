@@ -65,7 +65,7 @@ export async function POST(request: Request) {
                         systemInstruction: RECAP_SYSTEM_PROMPT,
                         maxOutputTokens: 4000,
                         // a short creative summary doesn't need deep reasoning, and thinking delays the first words
-                        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+                        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
                         abortSignal: abort.signal,
                     },
                 })
